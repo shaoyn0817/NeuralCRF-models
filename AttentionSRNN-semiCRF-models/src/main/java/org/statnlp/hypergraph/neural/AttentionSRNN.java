@@ -1,0 +1,41 @@
+package org.statnlp.hypergraph.neural;
+
+import java.util.AbstractMap.SimpleImmutableEntry;
+
+public class AttentionSRNN extends NeuralNetworkCore {
+	
+	private static final long serialVersionUID = 4592893499307238510L;
+
+	public AttentionSRNN(int hiddenSize, boolean bidirection, String optimizer, double learningRate, int clipping, int numLabels, int gpuId, String embedding) {
+		super(numLabels);
+		config.put("class", "AttentionSRNN");//-SRNN
+        config.put("hiddenSize", hiddenSize);
+        config.put("bidirection", bidirection);
+        config.put("optimizer", optimizer);
+        config.put("numLabels", numLabels);
+        config.put("embedding", embedding);
+        config.put("gpuid", gpuId);
+        config.put("learningRate", learningRate);
+        config.put("clipping", 5);
+	}
+
+	@Override
+	public Object hyperEdgeInput2NNInput(Object edgeInput) {
+		@SuppressWarnings("unchecked")
+		SimpleImmutableEntry<String, String> sentAndPos = (SimpleImmutableEntry<String, String>) edgeInput;
+		return sentAndPos.getKey();
+	}
+	
+	@Override
+	public int hyperEdgeInput2OutputRowIndex (Object edgeInput) {
+		@SuppressWarnings("unchecked")
+		SimpleImmutableEntry<String, Integer> sentAndPos = (SimpleImmutableEntry<String, Integer>) edgeInput;
+		int sentID = this.getNNInputID(sentAndPos.getKey()); 
+		//System.out.println(sentAndPos);
+		
+		
+		int row = this.getNNInputSize()*sentAndPos.getValue()+sentID;//sentAndPos.getValue() * this.getNNInputSize() + sentID;//
+		return row;
+	}
+
+}
