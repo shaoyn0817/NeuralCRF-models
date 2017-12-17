@@ -1,1 +1,19 @@
-Attention mechanism Segmental RNN combined with semiCRF models.
+Attention based Segmental RNN combined with semiCRF models.
+
+The complete algorithm framework is implemented by statnlp framework(https://gitlab.com/sutd_nlp/statnlp-core). 
+The algorithm mainly has two parts. The first part is semi-CRF part. This part is implemented by Java. It is contained in src/main/java/semi_crf folder. Other files in src folder is the statnlp framework source code. The second part is Attention SRNN neural network part. This part is implemented in Torch. It is contained in nn-crf-interface/neural_server/AttentionSRNN.lua. There is also a toy example in sampleNetwork/sample_SRNN-Attention_Network.lua which is exactly Attention-SRNN neural network I use in AttentionSRNN.lua. To test this network,
+run code
+th sample_SRNN-Attention_Network.lua
+Note, I have changed the Index.lua file in nn package. I found the original one is difficult to use when building the network. So, you need also download the sampleNetwork/Index.lua, and replace the old one in ~/torch/install/share/lua/5.2/nn/. Another option is to put the new Index.lua file in the same folder with sample_SRNN-Attention_Network.lua, and write a line of code "require 'Index'" in the top of sample_SRNN-Attention_Network.lua.
+
+
+Reference: 
+(SRNN) Segmental Recurrent Neural Networks.  https://arxiv.org/abs/1511.06018
+(semi-CRF) Semi-Markov Conditional Random Fields for Information Extraction.  http://www.cs.cmu.edu/afs/cs/Web/People/wcohen/postscript/semiCRF.pdf
+(Attention Mechanism) Hierarchical Attention Networks for Document Classification.  http://www.cs.cmu.edu/~./hovy/papers/16HLT-hierarchical-attention-networks.pdf
+(statnlp framework)  https://gitlab.com/sutd_nlp/statnlp-core
+
+
+
+
+
