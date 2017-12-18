@@ -1,5 +1,3 @@
-
---include 'GPUUtils.lua'
 local AttentionSRNN, parent = torch.class('AttentionSRNN', 'AbstractNeuralNetwork')
 
 function AttentionSRNN:__init(doOptimization, gpuid)
