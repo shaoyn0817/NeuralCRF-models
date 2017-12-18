@@ -122,7 +122,7 @@ public class semiCRFNetworkCompiler extends NetworkCompiler{
 				else if(Label.get(tag_id).getForm().equals("PER")) 
 					this.connect(6, tag_id, pos, network); 
 				else if(Label.get(tag_id).getForm().equals("O")) 
-					this.Oconnect(1, tag_id, pos, network); 
+					this.connect(1, tag_id, pos, network); 
 				else System.err.println("出现不一样的title名字！"+ Label.get(tag_id).getForm()+"**"); 
 			} 
 			 
@@ -242,15 +242,8 @@ public class semiCRFNetworkCompiler extends NetworkCompiler{
 			} else { 
 				for(int j = 0; j < this._labels.size(); j++){ 
 					int tag = this._labels.get(j)._id;
-					if(tag == tag_id){						
-						//long prenode = this.toNode(i, tag); 
-						//network.addEdge(node, new long[]{prenode});
-						continue; 
-					}
-					else{ 
-						long prenode = this.toNode(i, tag); 
-						network.addEdge(node, new long[]{prenode});
-					} 
+					long prenode = this.toNode(i, tag); 
+					network.addEdge(node, new long[]{prenode});
 				} 
 			} 
 		}
