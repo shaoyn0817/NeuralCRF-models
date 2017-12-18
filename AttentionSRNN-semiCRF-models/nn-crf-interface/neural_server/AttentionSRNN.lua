@@ -305,7 +305,7 @@ function AttentionSRNN:forward(isTraining, batchInputIds)
         output = self.network:forward(nnInput)
         output = torch.cat(torch.Tensor(), output, 1) 
     else
-        batchsize = 3
+        batchsize = 32
         batchnumber = math.ceil(nnInput[1]:size(1)/batchsize)
         if self.bidirection then
             for i = 0, batchnumber, 1 do
@@ -321,13 +321,9 @@ function AttentionSRNN:forward(isTraining, batchInputIds)
             end
         else
             for i = 0, batchnumber, 1 do
-                print(i)
                 start = i*batchsize+1
                 tail = (i+1)*batchsize
                 bs = batchsize
-                print(start)
-                print(tail)
-                print('---')
                 if tail > nnInput[1]:size(1) then
                     bs = nnInput[1]:size(1)-start+1
                 end
