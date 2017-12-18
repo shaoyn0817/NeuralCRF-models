@@ -302,12 +302,49 @@ function AttentionSRNN:forward(isTraining, batchInputIds)
     end
     local nnInput = self:getForwardInput(isTraining, batchInputIds)
  
-    output_table = self.network:forward(nnInput)
+    output = torch.Tensor()
+    if inTraining then
+        output = self.network:forward(nnInput)
+        output = torch.cat(torch.Tensor(), output, 1) 
+    else
+        batchsize = 3
+        batchnumber = math.ceil(nnInput[1]:size(1)/batchsize)
+        if self.bidirection then
+            for i = 0, batchnumber, 1 do
+                start = i*batchsize+1
+                tail = (i+1)*batchsize
+                bs = batchsize
+                if tail > nnInput[1]:size(1) then
+                    bs = nnInput[1]:size(1)-start+1
+                end
+                temp_output = self.network:forward({nnInput[1]:narraow(1, start, bs),nnInput[2]:narraow(1, start, bs)})
+                temp_tensor = torch.cat(torch.Tensor(), temp_output, 1) 
+                output = torch.cat(output, temp_tensor, 1)
+            end
+        else
+            for i = 0, batchnumber, 1 do
+                print(i)
+                start = i*batchsize+1
+                tail = (i+1)*batchsize
+                bs = batchsize
+                print(start)
+                print(tail)
+                print('---')
+                if tail > nnInput[1]:size(1) then
+                    bs = nnInput[1]:size(1)-start+1
+                end
+                temp_output = self.network:forward({nnInput[1]:narraow(1, start, bs)})
+                temp_tensor = torch.cat(torch.Tensor(), temp_output, 1) 
+                output = torch.cat(output, temp_tensor, 1)
+            end
+        end
+    end
     if self.gpuid >= 0 then
-        nn.utils.recursiveType(output_table, 'torch.DoubleTensor')
+        nn.utils.recursiveType(output, 'torch.DoubleTensor')
     end 
+    self.output = output
     --- this is to converting the table into tensor.
-    self.output = torch.cat(torch.Tensor(), output_table, 1) --row_num = 955*batchsuze   column=numlabels
+    --row_num = 955*batchsuze   column=numlabels
     if not self.outputPtr:isSameSizeAs(self.output) then
         self.outputPtr:resizeAs(self.output)
     end
