@@ -20,7 +20,7 @@ function AttentionSRNN:initialize(javadata, ...)
     local isTraining = javadata:get("isTraining")
     data.isTraining = isTraining
     self.bidirection = javadata:get("bidirection")
-
+ 
  
 
     if isTraining then
@@ -299,46 +299,51 @@ function AttentionSRNN:forward(isTraining, batchInputIds)
         self.params:copy(self.paramsDouble:cuda())
     end
     local nnInput = self:getForwardInput(isTraining, batchInputIds)
- 
-    output = torch.Tensor()
-    if inTraining then
-        output = self.network:forward(nnInput)
-        output = torch.cat(torch.Tensor(), output, 1) 
+    out = torch.CudaTensor()
+    if isTraining then
+        if not self.bidirection then
+            out = self.network:forward({nnInput[1]})
+            out = torch.cat(torch.CudaTensor(), out, 1)
+        else
+            out = self.network:forward(nnInput)
+            out = torch.cat(torch.CudaTensor(), out, 1) 
+        end             
     else
-        batchsize = 32
-        batchnumber = math.ceil(nnInput[1]:size(1)/batchsize)
+        batchsize = 3
+        batchnumber = math.ceil(nnInput[1]:size(2)/batchsize)
         if self.bidirection then
-            for i = 0, batchnumber, 1 do
+            for i = 0, batchnumber-1, 1 do
                 start = i*batchsize+1
                 tail = (i+1)*batchsize
                 bs = batchsize
-                if tail > nnInput[1]:size(1) then
-                    bs = nnInput[1]:size(1)-start+1
+
+                if tail > nnInput[1]:size(2) then
+                    bs = nnInput[1]:size(2)-start+1
                 end
-                temp_output = self.network:forward({nnInput[1]:narraow(1, start, bs),nnInput[2]:narraow(1, start, bs)})
-                temp_tensor = torch.cat(torch.Tensor(), temp_output, 1) 
-                output = torch.cat(output, temp_tensor, 1)
+
+                temp_output = self.network:forward({nnInput[1]:narrow(2, start, bs),nnInput[2]:narraow(2, start, bs)})
+                temp_tensor = torch.cat(torch.CudaTensor(), temp_output, 1) 
+                out = torch.cat(out, temp_tensor, 1)
             end
         else
-            for i = 0, batchnumber, 1 do
+            for i = 0, batchnumber-1, 1 do
                 start = i*batchsize+1
                 tail = (i+1)*batchsize
                 bs = batchsize
-                if tail > nnInput[1]:size(1) then
-                    bs = nnInput[1]:size(1)-start+1
+
+                if tail > nnInput[1]:size(2) then
+                    bs = nnInput[1]:size(2)-start+1
                 end
-                temp_output = self.network:forward({nnInput[1]:narraow(1, start, bs)})
-                temp_tensor = torch.cat(torch.Tensor(), temp_output, 1) 
-                output = torch.cat(output, temp_tensor, 1)
+                temp_output = self.network:forward({nnInput[1]:narrow(2, start, bs)})
+                temp_tensor = torch.cat(torch.CudaTensor(), temp_output, 1) 
+                out = torch.cat(out, temp_tensor, 1)
             end
         end
     end
-    if self.gpuid >= 0 then
-        nn.utils.recursiveType(output, 'torch.DoubleTensor')
-    end 
-    self.output = output
-    --- this is to converting the table into tensor.
-    --row_num = 955*batchsuze   column=numlabels
+    self.output = out:double()
+    --if self.gpuid >= 0 then
+      --  nn.utils.recursiveType(self.output, 'torch.DoubleTensor')
+    --end  
     if not self.outputPtr:isSameSizeAs(self.output) then
         self.outputPtr:resizeAs(self.output)
     end
