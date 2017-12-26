@@ -13,7 +13,7 @@ The algorithm mainly has two parts.
 To test this sample network, just enter the sampleNetwork folder, and run code
 th sample_SRNN-Attention_Network.lua
 
-Note: I have changed the Index.lua file in nn package. I found the original one is difficult to use when building the network. So, you need also download the sampleNetwork/Index.lua, and replace the old one in ~/torch/install/share/lua/5.2/nn/. Another option is to put the new Index.lua file in the same folder with sample_SRNN-Attention_Network.lua, and write a line of code "require 'Index'" in the top of sample_SRNN-Attention_Network.lua.
+Note: I have changed the Index.lua file in nn package. So, you need also download the sampleNetwork/Index.lua, and replace the old one in ~/torch/install/share/lua/5.2/nn/. Another option is to put the new Index.lua file in the same folder with sample_SRNN-Attention_Network.lua, and write a line of code "require 'Index'" in the top of sample_SRNN-Attention_Network.lua.
 
 
 Reference: 
